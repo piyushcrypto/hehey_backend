@@ -17,6 +17,38 @@ Rails.application.routes.draw do
 
     # Custom password change endpoint (authenticated users changing their password)
     put "password", to: "auth/passwords#update"
+
+    # Profile management
+    get "profile", to: "auth/profiles#show"
+    put "profile", to: "auth/profiles#update"
+    put "profile/avatar", to: "auth/profiles#update_avatar"
+    delete "profile/avatar", to: "auth/profiles#destroy_avatar"
+  end
+
+  # Home endpoint (single request for all home screen data)
+  get "home", to: "home#index"
+
+  # Trip routes
+  resources :trips, only: [:create, :show, :update, :destroy] do
+    collection do
+      get :latest
+      get :expiring_soon
+      get :sponsored
+      get :search
+      get :my
+      get :joined
+    end
+    member do
+      patch :reschedule
+    end
+    resources :join_requests, only: [:create]
+  end
+
+  # Location routes
+  resources :locations, only: [] do
+    collection do
+      get :popular
+    end
   end
 
   # API routes (protected)

@@ -6,7 +6,14 @@ module Auth
 
     # PUT /auth/password
     def update
-      if current_user.update_with_password(password_params)
+      # Map new_password to password for Devise compatibility
+      mapped_params = {
+        current_password: params.dig(:user, :current_password),
+        password: params.dig(:user, :new_password),
+        password_confirmation: params.dig(:user, :new_password)
+      }
+
+      if current_user.update_with_password(mapped_params)
         # Regenerate JTI to invalidate old tokens
         # This forces the user to login again with the new password
         current_user.update!(jti: SecureRandom.uuid)
@@ -22,12 +29,6 @@ module Auth
           errors: current_user.errors.full_messages
         }, status: :unprocessable_entity
       end
-    end
-
-    private
-
-    def password_params
-      params.require(:user).permit(:current_password, :password, :password_confirmation)
     end
   end
 end

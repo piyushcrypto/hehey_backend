@@ -6,8 +6,8 @@ Rails.application.configure do
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 
-  # Do not eager load code on boot.
-  config.eager_load = false
+  # Eager load code on boot to avoid race conditions on first request
+  config.eager_load = true
 
   # Show full error reports.
   config.consider_all_requests_local = true
@@ -26,8 +26,9 @@ Rails.application.configure do
   # Change to :null_store to avoid any caching.
   config.cache_store = :memory_store
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # Store uploaded files on S3 (see config/storage.yml for options).
+  # Use :local for local development without S3, :amazon for S3
+  config.active_storage.service = ENV["AWS_ACCESS_KEY_ID"].present? ? :amazon : :local
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
@@ -52,6 +53,9 @@ Rails.application.configure do
 
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
+
+  # Use Solid Queue for background jobs
+  config.active_job.queue_adapter = :solid_queue
 
   # Highlight code that triggered redirect in logs.
   config.action_dispatch.verbose_redirect_logs = true
